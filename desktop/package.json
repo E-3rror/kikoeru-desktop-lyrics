@@ -1,0 +1,21 @@
+{
+  "name": "kikoeru-desktop-lyrics",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kikoeru 桌面歌词 — 脱离浏览器的悬浮歌词与歌词选择窗口",
+  "main": "main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --config electron-builder.yml"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "electron": "^44.1.1",
+    "electron-builder": "^26.15.3"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "electron-winstaller@5.4.0": true
+  }
+}

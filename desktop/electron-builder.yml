@@ -1,0 +1,19 @@
+appId: online.number17.kikoeru.desktoplyrics
+productName: Kikoeru桌面歌词
+directories:
+  output: dist
+  buildResources: build
+files:
+  - main/**/*
+  - preload/**/*
+  - renderer/**/*
+  - build/tray.png
+  - package.json
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: build/icon.png
+portable:
+  artifactName: desktop-lyrics.exe

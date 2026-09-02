@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Kikoeru 桌面歌词</title>
+<style>
+  :root {
+    --dl-font-size: 34px;
+    --dl-sung: #9c27b0;
+    --dl-unsung: #f2f2f2;
+    --dl-stroke: #000000;
+    --dl-backdrop: rgba(0, 0, 0, 0);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: transparent;
+    overflow: hidden;
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB",
+                 "Segoe UI", system-ui, sans-serif;
+    cursor: default;
+    user-select: none;
+  }
+  #root {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px;
+    padding: 10px 14px 42px;
+    background: var(--dl-backdrop);
+    border-radius: 10px;
+    -webkit-app-region: drag;
+  }
+  /* 一行歌词由描边层与填充层叠成: 描边在下保证任何壁纸上都可读,
+     填充层用渐变做逐字高亮 */
+  .line { position: relative; width: 100%; text-align: center; line-height: 1.25; }
+  .line .stroke, .line .fill {
+    display: block; width: 100%;
+    font-weight: 700;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .line .stroke {
+    position: absolute; inset: 0;
+    -webkit-text-stroke: 5px var(--dl-stroke);
+    color: transparent;
+    paint-order: stroke fill;
+  }
+  .line .fill { position: relative; color: var(--dl-unsung); }
+
+  #current { font-size: var(--dl-font-size); }
+  #current .fill {
+    background-image: linear-gradient(90deg,
+      var(--dl-sung) 0%, var(--dl-sung) var(--progress, 0%),
+      var(--dl-unsung) var(--progress, 0%), var(--dl-unsung) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  #next { font-size: calc(var(--dl-font-size) * 0.62); opacity: 0.55; }
+  #next.hidden { display: none; }
+
+  #hint {
+    font-size: 15px; color: #d8d8d8; text-align: center;
+    text-shadow: 0 1px 3px #000;
+  }
+  #hint.hidden { display: none; }
+
+  /* 控制条: 指针移到悬浮歌词上就出现（由主进程按光标坐标判定, 见 windows.js
+     startPointerWatch —— 拖拽区域收不到 CSS :hover）; 锁定时永不出现.
+     尺寸相对初版整体放大 120%. */
+  #bar {
+    position: absolute; left: 50%; bottom: 5px;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 2px;
+    padding: 4px 7px;
+    border-radius: 22px;
+    background: rgba(24, 24, 28, 0.82);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.14s ease;
+    -webkit-app-region: no-drag;
+  }
+  body.pointer-over #bar, body:hover #bar { opacity: 1; pointer-events: auto; }
+  body.locked #bar { opacity: 0 !important; pointer-events: none !important; }
+
+  #bar button {
+    border: 0; background: transparent; color: #eee;
+    font-size: 17px; line-height: 1;
+    padding: 7px 10px; border-radius: 14px;
+    cursor: pointer; font-family: inherit;
+  }
+  #bar button:hover { background: rgba(255, 255, 255, 0.16); }
+  #bar .sep { width: 1px; height: 19px; background: rgba(255,255,255,0.18); margin: 0 4px; }
+
+  /* 锁定时露出的小解锁点 */
+  #unlock {
+    position: absolute; right: 6px; top: 6px;
+    width: 22px; height: 22px; border-radius: 11px;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(24, 24, 28, 0.7); color: #fff; font-size: 12px;
+    cursor: pointer; -webkit-app-region: no-drag;
+  }
+  body.locked #unlock { display: flex; }
+  body.locked #unlock:hover { background: rgba(156, 39, 176, 0.9); }
+  body.locked #root { background: transparent; }
+</style>
+</head>
+<body>
+  <div id="root">
+    <div id="hint">等待 Kikoeru 网页端…</div>
+    <div class="line" id="current"><span class="stroke"></span><span class="fill"></span></div>
+    <div class="line" id="next"><span class="stroke"></span><span class="fill"></span></div>
+    <div id="unlock" title="解锁（Ctrl+Alt+L）">🔓</div>
+    <div id="bar">
+      <button data-act="prev" title="上一曲">⏮</button>
+      <button data-act="toggle" title="播放/暂停" id="playBtn">⏯</button>
+      <button data-act="next" title="下一曲">⏭</button>
+      <span class="sep"></span>
+      <button data-act="font-down" title="缩小字号">A－</button>
+      <button data-act="font-up" title="放大字号">A＋</button>
+      <span class="sep"></span>
+      <button data-act="lock" title="锁定（鼠标穿透）">🔒</button>
+      <button data-act="select" title="歌词选择">📃</button>
+      <button data-act="close" title="关闭悬浮歌词">✕</button>
+    </div>
+  </div>
+  <script src="lyrics.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridge 设置</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d151b;
+    --panel: rgba(24, 37, 45, .88);
+    --line: rgba(174, 215, 210, .16);
+    --muted: #91a8aa;
+    --text: #edf7f4;
+    --accent: #8ce3d2;
+    --warning: #ffbd79;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-width: 480px;
+    min-height: 100vh;
+    padding: 30px 34px 26px;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 92% 0%, rgba(140, 227, 210, .14), transparent 34%),
+      radial-gradient(circle at 0% 100%, rgba(255, 189, 121, .08), transparent 42%),
+      var(--bg);
+    font: 14px/1.5 "Avenir Next", "Segoe UI", "Microsoft YaHei", sans-serif;
+    overflow: hidden;
+  }
+  .shell { max-width: 610px; margin: 0 auto; }
+  .hero { margin-bottom: 22px; }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .16em;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(140, 227, 210, .12), 0 0 16px rgba(140, 227, 210, .6);
+  }
+  h1 {
+    margin: 0;
+    color: var(--text);
+    font: 400 32px/1.1 "Iowan Old Style", "Baskerville", "Songti SC", serif;
+    letter-spacing: -.02em;
+  }
+  h1 span { color: var(--accent); }
+  .hero p { max-width: 460px; margin: 10px 0 0; color: var(--muted); }
+  .panel {
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .04);
+    backdrop-filter: blur(14px);
+  }
+  .field + .field { margin-top: 19px; }
+  .grid { display: grid; grid-template-columns: minmax(130px, .62fr) minmax(220px, 1fr); gap: 16px; margin-top: 19px; }
+  .grid .field { margin-top: 0; }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #d7e8e5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  label small {
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid rgba(174, 215, 210, .2);
+    border-radius: 9px;
+    outline: none;
+    padding: 0 12px;
+    color: var(--text);
+    background: rgba(8, 17, 22, .55);
+    font: 14px/1 "SFMono-Regular", Consolas, monospace;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+  }
+  input:focus { border-color: var(--accent); background: rgba(8, 17, 22, .8); box-shadow: 0 0 0 3px rgba(140, 227, 210, .12); }
+  input.readonly { color: #a9c3bf; background: rgba(255, 255, 255, .045); cursor: default; }
+  .copy-wrap { position: relative; }
+  .copy-wrap input { padding-right: 76px; cursor: pointer; }
+  .copy-button {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--accent);
+    background: rgba(140, 227, 210, .08);
+    box-shadow: none;
+    font-size: 12px;
+  }
+  .copy-button:hover { background: rgba(140, 227, 210, .16); box-shadow: none; transform: none; }
+  .hint { margin: 7px 2px 0; color: var(--muted); font-size: 12px; }
+  .actions { display: flex; align-items: center; gap: 13px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+  button {
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 17px;
+    color: #102a2a;
+    background: var(--accent);
+    box-shadow: 0 8px 18px rgba(75, 167, 155, .18);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    transition: transform .18s, filter .18s, box-shadow .18s;
+  }
+  button:hover { filter: brightness(1.07); box-shadow: 0 10px 24px rgba(75, 167, 155, .28); transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  button:disabled { opacity: .65; cursor: wait; transform: none; }
+  .status { min-height: 20px; color: var(--accent); font-size: 12px; }
+  .status.error { color: var(--warning); }
+  .footnote { margin: 16px 3px 0; color: #6f8789; font-size: 11px; }
+  @media (max-width: 520px) {
+    body { min-width: 0; padding: 24px 20px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div class="eyebrow">LOCAL BRIDGE / CONTROL</div>
+      <h1>Bridge <span>设置</span></h1>
+      <p>让桌面歌词与浏览器里的 Userscript 保持稳定连接。</p>
+    </header>
+    <main class="panel">
+      <section class="field">
+        <label for="url">Bridge 地址 <small>只读</small></label>
+        <div class="copy-wrap">
+          <input id="url" class="readonly" readonly title="点击复制 Bridge 地址">
+          <button id="copy" class="copy-button" type="button">复制</button>
+        </div>
+        <p class="hint">将此地址填入 Userscript 的 Bridge 配置中。</p>
+      </section>
+      <div class="grid">
+        <section class="field">
+          <label for="port">端口</label>
+          <input id="port" type="number" min="1" max="65535" step="1" inputmode="numeric">
+        </section>
+        <section class="field">
+          <label for="secret">Secret</label>
+          <input id="secret" autocomplete="off" spellcheck="false">
+        </section>
+      </div>
+      <div class="actions">
+        <button id="save">保存并重启 Bridge</button>
+        <span id="status" class="status" role="status" aria-live="polite"></span>
+      </div>
+    </main>
+    <p class="footnote">修改端口或 Secret 后，Bridge 会立即重启并写入本机配置。</p>
+  </div>
+  <script src="bridge-settings.js"></script>
+</body>
+</html>

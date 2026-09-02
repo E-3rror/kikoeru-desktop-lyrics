@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>歌词选择</title>
+<style>
+  /* 三套主题都建在同一个透明窗上, 靠 CSS 变量切换, 不必重建窗口 */
+  :root {
+    --sel-font: 17px;
+    --bg: #1b1b1f;
+    --bg-bar: #232329;
+    --bg-tool: #1f1f25;
+    --fg: #ececf1;
+    --fg-dim: #9a9aa5;
+    --line: #26262d;
+    --row-hover: #24242b;
+    --row-active: #2f5d3a;
+    --chip: #3a3a45;
+    --chip-fg: #cfcfda;
+    --btn: #33333c;
+    --btn-hover: #40404b;
+    --accent: #9c27b0;
+    --shadow: 0 8px 28px rgba(0,0,0,0.45);
+    --scroll-thumb: #4a4a57;
+    --scroll-thumb-hover: #5e5e6d;
+    --text-shadow: none;
+  }
+  html[data-theme="light"] {
+    --bg: #fbfbfd;
+    --bg-bar: #eeeef3;
+    --bg-tool: #f4f4f8;
+    --fg: #1c1c22;
+    --fg-dim: #6b6b76;
+    --line: #e2e2ea;
+    --row-hover: #eeeef4;
+    --row-active: #cdebd6;
+    --chip: #e3e3ec;
+    --chip-fg: #4a4a57;
+    --btn: #e3e3ec;
+    --btn-hover: #d5d5e0;
+    --shadow: 0 8px 28px rgba(0,0,0,0.18);
+    --scroll-thumb: #c3c3d0;
+    --scroll-thumb-hover: #aaaab8;
+  }
+  html[data-theme="transparent"] {
+    --bg: rgba(0,0,0,0);
+    --bg-bar: rgba(20,20,26,0.42);
+    --bg-tool: rgba(20,20,26,0.30);
+    --fg: #ffffff;
+    --fg-dim: #d6d6e0;
+    --line: rgba(255,255,255,0.10);
+    --row-hover: rgba(255,255,255,0.10);
+    --row-active: rgba(76,175,110,0.38);
+    --chip: rgba(255,255,255,0.16);
+    --chip-fg: #ffffff;
+    --btn: rgba(255,255,255,0.16);
+    --btn-hover: rgba(255,255,255,0.28);
+    --shadow: none;
+    --scroll-thumb: rgba(255,255,255,0.28);
+    --scroll-thumb-hover: rgba(255,255,255,0.45);
+    /* 透明主题下背后可能是任意壁纸, 加投影保证可读 */
+    --text-shadow: 0 1px 3px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,0.7);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: transparent; }
+  body {
+    color: var(--fg);
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    font-size: var(--sel-font);
+    display: flex; flex-direction: column;
+    user-select: none; overflow: hidden;
+    background: var(--bg);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    text-shadow: var(--text-shadow);
+  }
+
+  /* ---------- 滚动条: 默认样式太丑, 全部自绘 ---------- */
+  #list::-webkit-scrollbar, .modal .panel::-webkit-scrollbar { width: 10px; }
+  #list::-webkit-scrollbar-track, .modal .panel::-webkit-scrollbar-track { background: transparent; }
+  #list::-webkit-scrollbar-thumb, .modal .panel::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  #list::-webkit-scrollbar-thumb:hover, .modal .panel::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hover); background-clip: content-box;
+  }
+  #list { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+
+  #titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; background: var(--bg-bar);
+    -webkit-app-region: drag; flex: 0 0 auto;
+    border-radius: 10px 10px 0 0;
+  }
+  #titlebar .title { font-size: calc(var(--sel-font) * 0.95); font-weight: 600; flex: 0 0 auto; }
+  #titlebar .track {
+    color: var(--fg-dim); font-size: calc(var(--sel-font) * 0.82); flex: 1 1 auto;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #titlebar button { -webkit-app-region: no-drag; }
+
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    padding: 8px 12px; background: var(--bg-tool); flex: 0 0 auto;
+  }
+  button {
+    border: 0; border-radius: 7px; padding: 7px 12px;
+    background: var(--btn); color: var(--fg); cursor: pointer;
+    font-family: inherit; font-size: calc(var(--sel-font) * 0.82);
+  }
+  button:hover { background: var(--btn-hover); }
+  button.primary { background: var(--accent); color: #fff; }
+  button.warn { background: #b8860b; color: #fff; }
+  button.danger { background: #b3261e; color: #fff; }
+  button.ghost { background: transparent; padding: 6px 8px; }
+  button.ghost:hover { background: var(--btn-hover); }
+  button.on { outline: 2px solid var(--accent); }
+  label.toggle {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    font-size: calc(var(--sel-font) * 0.82);
+  }
+
+  #list { flex: 1 1 auto; overflow-y: auto; padding: 4px 0; }
+  .row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 12px; border-bottom: 1px solid var(--line); cursor: pointer;
+  }
+  .row:hover { background: var(--row-hover); }
+  .row.active { background: var(--row-active); }
+  .row .time {
+    flex: 0 0 auto; font-variant-numeric: tabular-nums;
+    background: var(--chip); border-radius: 10px; padding: 2px 8px;
+    font-size: calc(var(--sel-font) * 0.72); color: var(--chip-fg);
+    text-shadow: none;
+  }
+  .row .text { flex: 1 1 auto; word-break: break-word; line-height: 1.5; }
+  .row.deleted .text { text-decoration: line-through; opacity: 0.45; }
+  .row .ops { flex: 0 0 auto; display: flex; gap: 4px; opacity: 0; }
+  .row:hover .ops { opacity: 1; }
+  .row .ops button { padding: 4px 8px; font-size: calc(var(--sel-font) * 0.72); }
+
+  #empty { padding: 26px; text-align: center; color: var(--fg-dim); line-height: 1.9; }
+  #status {
+    padding: 7px 12px; font-size: calc(var(--sel-font) * 0.8); color: var(--fg-dim);
+    background: var(--bg-tool); flex: 0 0 auto; border-radius: 0 0 10px 10px;
+  }
+  #status.error { color: #ff6b5e; }
+
+  /* ---------- 精简模式: 只留歌词与点击跳转 ---------- */
+  body.compact .toolbar,
+  body.compact #status,
+  body.compact .row .time,
+  body.compact .row .ops,
+  body.compact #titlebar .title { display: none; }
+  body.compact #titlebar { padding: 5px 8px; background: transparent; }
+  body.compact #list { border-radius: 0 0 10px 10px; }
+
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal.open { display: flex; }
+  .modal .panel {
+    background: var(--bg-bar); border-radius: 10px; padding: 18px;
+    width: 100%; max-width: 560px; max-height: 100%; overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .modal h2 { font-size: var(--sel-font); margin-bottom: 12px; }
+  .modal input, .modal textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+    color: var(--fg); padding: 9px; font-family: inherit;
+    font-size: calc(var(--sel-font) * 0.9); margin-bottom: 12px;
+  }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .modal .hintline {
+    color: var(--fg-dim); font-size: calc(var(--sel-font) * 0.82); margin-bottom: 10px;
+  }
+  .option {
+    padding: 10px 12px; border-radius: 7px; cursor: pointer;
+    border: 1px solid var(--line); margin-bottom: 7px;
+  }
+  .option:hover { background: var(--row-hover); }
+  .option .name { font-weight: 600; }
+  .option .sub {
+    color: var(--fg-dim); font-size: calc(var(--sel-font) * 0.8);
+    margin-top: 3px; word-break: break-all;
+  }
+  .option .ai {
+    color: #fff; background: var(--accent); border-radius: 8px;
+    padding: 1px 7px; font-size: calc(var(--sel-font) * 0.72);
+  }
+</style>
+</head>
+<body>
+  <div id="titlebar">
+    <span class="title">歌词选择</span>
+    <span class="track" id="track"></span>
+    <button class="ghost" data-act="theme" id="themeBtn" title="切换主题（深色 / 浅色 / 透明）">🎨</button>
+    <button class="ghost" data-act="compact" id="compactBtn" title="精简模式">🗜</button>
+    <button class="ghost" data-act="font-down" title="缩小字号">A－</button>
+    <button class="ghost" data-act="font-up" title="放大字号">A＋</button>
+    <button class="ghost" data-act="close-window" title="关闭">✕</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="warn" data-act="save">保存歌词</button>
+    <button data-act="other">选择其他歌词</button>
+    <button class="danger" data-act="close-lyric">关闭歌词</button>
+    <button class="primary" data-act="goto">转到当前段落</button>
+    <label class="toggle"><input type="checkbox" id="track-toggle" checked>自动跟踪当前歌词</label>
+    <button data-act="set-end" title="把当前播放时间设为当前行的结束时间">设为结束时间</button>
+    <button data-act="del-end">删除结束时间</button>
+  </div>
+
+  <div id="list"></div>
+  <div id="empty">等待 Kikoeru 网页端…</div>
+  <div id="status"></div>
+
+  <div class="modal" id="editModal">
+    <div class="panel">
+      <h2>编辑歌词</h2>
+      <textarea id="editText" rows="4"></textarea>
+      <div class="actions">
+        <button data-act="edit-cancel">取消</button>
+        <button class="primary" data-act="edit-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="saveModal">
+    <div class="panel">
+      <h2>保存歌词文件</h2>
+      <div class="hintline">请输入保存文件路径，路径以 .vtt 结束，相对于当前作品的根文件夹：</div>
+      <input id="savePath" type="text">
+      <div class="actions">
+        <button data-act="save-cancel">取消</button>
+        <button class="primary" data-act="save-ok">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="optionModal">
+    <div class="panel">
+      <h2>选择其他歌词文件</h2>
+      <div id="optionList"></div>
+      <div class="actions">
+        <button data-act="option-cancel">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="select.js"></script>
+</body>
+</html>

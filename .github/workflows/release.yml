@@ -42,6 +42,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
           Copy-Item "desktop/dist/desktop-lyrics.exe" (Join-Path $staging "desktop-lyrics.exe") -ErrorAction Stop
           Copy-Item "userscript/kikoeru-desktop-lyrics.user.js" (Join-Path $staging "kikoeru-desktop-lyrics.user.js") -ErrorAction Stop
+          Copy-Item "userscript/asmr-one-desktop-lyrics.user.js" (Join-Path $staging "asmr-one-desktop-lyrics.user.js") -ErrorAction Stop
           Compress-Archive -Path (Join-Path $staging "*") -DestinationPath $archive -CompressionLevel Optimal -Force
 
           if (-not (Test-Path $archive)) {

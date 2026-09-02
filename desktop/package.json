@@ -1,6 +1,6 @@
 {
   "name": "kikoeru-desktop-lyrics",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Kikoeru 桌面歌词 — 脱离浏览器的悬浮歌词与歌词选择窗口",
   "main": "main/index.js",

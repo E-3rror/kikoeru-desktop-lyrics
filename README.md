@@ -17,6 +17,10 @@
 - 托盘常驻、鼠标穿透锁定（`Ctrl+Alt+L`）和窗口位置/样式持久化。
 - Bridge 仅监听回环地址 `127.0.0.1`，可选 Secret 鉴权，不保存或转发 Kikoeru JWT。
 
+## 界面预览
+
+![桌面歌词窗口](docs/images/desktop-lyrics.png)
+
 ## 使用前提
 
 - Windows（当前打包目标为 Windows x64 portable）。
@@ -71,9 +75,9 @@ npm run build
 
 Bridge 配置可通过环境变量覆盖持久化配置：
 
-| 变量 | 说明 | 默认值 |
-| --- | --- | --- |
-| `DESKTOP_LYRICS_PORT` | 监听端口（1-65535） | `18765` |
+| 变量                    | 说明                    | 默认值   |
+| ----------------------- | ----------------------- | -------- |
+| `DESKTOP_LYRICS_PORT`   | 监听端口（1-65535）     | `18765`  |
 | `DESKTOP_LYRICS_SECRET` | 请求鉴权 Secret，可为空 | 空字符串 |
 
 例如在 PowerShell 中使用自定义端口启动：
@@ -99,6 +103,14 @@ Bridge 只绑定 `127.0.0.1`，网页端通过 SSE 接收命令，并使用 Kiko
 ### 歌词选择窗口没有内容
 
 先确认当前曲目已播放并等待页面加载歌词。用户脚本通过页面自身的 `fetch` 观察 `/api/media/check-lrc`、`query-lrc` 和 `fetch-lrc` 请求；如果 Kikoeru 页面结构或接口发生变化，可能需要更新脚本中的适配逻辑。
+
+## Screenshot
+
+![歌词选择窗口](docs/images/lyrics-select_1.png)
+
+![透明主题歌词选择窗口](docs/images/lyrics-select_2.png)
+
+![精简模式歌词窗口](docs/images/lyrics-select_3.png)
 
 ## 目录结构
 

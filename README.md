@@ -28,11 +28,11 @@
 
 ### 1. 安装桌面端
 
-可以直接运行构建产物 `desktop/dist/desktop-lyrics.exe`（如果项目尚未构建，先执行下面的构建命令），应用启动后会驻留在系统托盘。
+请从项目 GitHub 的 [Releases](../../releases/latest) 下载最新的 `kikoeru-desktop-lyrics-*.zip`，解压后运行其中的 `desktop-lyrics.exe`。应用启动后会驻留在系统托盘。
 
 ### 2. 安装用户脚本
 
-在浏览器中打开 `userscript/kikoeru-desktop-lyrics.user.js`，交给 Tampermonkey/Violentmonkey 安装。脚本默认匹配 `http://127.0.0.1:8888/*`；如果 Kikoeru 使用其他地址，请在脚本头部修改 `@match`，并按实际地址收窄匹配范围。
+在上一步下载的压缩包中打开 `kikoeru-desktop-lyrics.user.js`，交给 Tampermonkey/Violentmonkey 安装。脚本默认匹配 `http://127.0.0.1:8888/*`；如果 Kikoeru 使用其他地址，请在脚本头部修改 `@match`，并按实际地址收窄匹配范围。
 
 ### 3. 配置 Bridge
 
@@ -64,6 +64,8 @@ npm run build
 ```
 
 构建结果输出到 `desktop/dist/`，便携版文件名为 `desktop-lyrics.exe`。
+
+向仓库推送形如 `v0.1.0` 的 Git 标签后，GitHub Actions 会自动构建并创建 Release，Release 中的 ZIP 同时包含桌面端和用户脚本。
 
 ## Bridge 配置
 

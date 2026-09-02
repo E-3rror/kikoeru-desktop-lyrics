@@ -1,0 +1,57 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build desktop application
+        working-directory: desktop
+        run: npm run build
+
+      - name: Package release files
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $staging = Join-Path $env:RUNNER_TEMP "kikoeru-desktop-lyrics-$env:RELEASE_TAG"
+          $archive = Join-Path $env:GITHUB_WORKSPACE "kikoeru-desktop-lyrics-$env:RELEASE_TAG.zip"
+
+          New-Item -ItemType Directory -Force -Path $staging | Out-Null
+          Copy-Item "desktop/dist/desktop-lyrics.exe" (Join-Path $staging "desktop-lyrics.exe") -ErrorAction Stop
+          Copy-Item "userscript/kikoeru-desktop-lyrics.user.js" (Join-Path $staging "kikoeru-desktop-lyrics.user.js") -ErrorAction Stop
+          Compress-Archive -Path (Join-Path $staging "*") -DestinationPath $archive -CompressionLevel Optimal -Force
+
+          if (-not (Test-Path $archive)) {
+            throw "Release archive was not created: $archive"
+          }
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: kikoeru-desktop-lyrics-${{ github.ref_name }}.zip
